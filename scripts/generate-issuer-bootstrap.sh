@@ -35,7 +35,7 @@ if [[ -z "$issuer_host" ]]; then
 fi
 
 did_id="did:web:${issuer_host}"
-did_doc_path="/.well-known/did.json"
+did_doc_path="/did.json"
 if [[ -n "$issuer_path" ]]; then
   IFS='/' read -r -a path_parts <<< "${issuer_path#/}"
   for part in "${path_parts[@]}"; do
@@ -43,7 +43,6 @@ if [[ -n "$issuer_path" ]]; then
       did_id="${did_id}:${part}"
     fi
   done
-  did_doc_path="${issuer_path}/did.json"
 fi
 
 cat <<EOF

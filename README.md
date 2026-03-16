@@ -109,6 +109,18 @@ and the DID document will be expected at:
 https://gxdch.dil.collab-cloud.eu/issuer/did.json
 ```
 
+Internally, the bundled NGINX server now serves the DID document at:
+
+```text
+/did.json
+```
+
+so your gateway should rewrite:
+
+```text
+/issuer/did.json -> /did.json
+```
+
 This creates:
 
 - `Secret/issuer-bootstrap`
@@ -153,7 +165,7 @@ kubectl apply -n argocd -f platform-apps/argocd/gxdch-issuer-application.yaml
 
 The most important externally reachable endpoints are:
 
-- `https://gxdch.dil.collab-cloud.eu/issuer/did.json` -> `dataspace-issuer:80`
+- `https://gxdch.dil.collab-cloud.eu/issuer/did.json` -> `dataspace-issuer:80` with prefix rewrite to `/did.json`
 - `https://issuer.example.com/api/admin/` -> `dataspace-issuer-service:10013`
 - `https://issuer.example.com/api/issuance/` -> `dataspace-issuer-service:10012`
 - `https://issuer.example.com/api/identity/` -> `dataspace-issuer-service:10015`
