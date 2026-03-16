@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: issuerservice
-          image: ghcr.io/REPLACE_ME/issuerservice:latest
+          image: ghcr.io/data-space-core/issuerservice:latest
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
