@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: issuer-postgres
+  namespace: gxdch-issuer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: issuer-postgres
+  template:
+    metadata:
+      labels:
+        app: issuer-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16.3-alpine3.20
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: gxdch-issuer-stack
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: gxdch-issuer-stack
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: gxdch-issuer-stack
+                  key: POSTGRES_DB
+          ports:
+            - containerPort: 5432
+              name: postgres
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - postgres
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d/issuer-initdb-config.sql
+              subPath: issuer-initdb-config.sql
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: issuer-postgres-data
+        - name: initdb
+          configMap:
+            name: issuer-initdb-config

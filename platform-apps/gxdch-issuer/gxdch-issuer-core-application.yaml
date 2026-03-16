@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gxdch-issuer-core
+  namespace: argocd
+spec:
+  project: gxdch-issuer
+  source:
+    repoURL: https://github.com/Data-Space-Core/GXDCH-Issuer.git
+    targetRevision: main
+    path: platform-apps/gxdch-issuer/core
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: gxdch-issuer
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dataspace-issuer-service
+  namespace: gxdch-issuer
+spec:
+  selector:
+    app: dataspace-issuer-service
+  ports:
+    - name: web
+      port: 10010
+      targetPort: web
+    - name: sts
+      port: 10011
+      targetPort: sts
+    - name: issuance
+      port: 10012
+      targetPort: issuance
+    - name: issueradmin
+      port: 10013
+      targetPort: issueradmin
+    - name: version
+      port: 10014
+      targetPort: version
+    - name: identity
+      port: 10015
+      targetPort: identity
+    - name: did
+      port: 10016
+      targetPort: did

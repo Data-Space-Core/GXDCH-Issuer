@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: issuer-vault
+  namespace: gxdch-issuer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: issuer-vault
+  template:
+    metadata:
+      labels:
+        app: issuer-vault
+    spec:
+      containers:
+        - name: vault
+          image: hashicorp/vault:1.18
+          imagePullPolicy: IfNotPresent
+          args:
+            - server
+            - -dev
+            - -dev-listen-address=0.0.0.0:8200
+            - -dev-root-token-id=$(VAULT_DEV_ROOT_TOKEN_ID)
+          env:
+            - name: VAULT_DEV_ROOT_TOKEN_ID
+              valueFrom:
+                secretKeyRef:
+                  name: gxdch-issuer-stack
+                  key: VAULT_DEV_ROOT_TOKEN_ID
+            - name: VAULT_ADDR
+              value: http://127.0.0.1:8200
+            - name: SKIP_SETCAP
+              value: "true"
+          ports:
+            - containerPort: 8200
+              name: http
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20

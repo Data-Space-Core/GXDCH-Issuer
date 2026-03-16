@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dataspace-issuer-server
+  namespace: gxdch-issuer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dataspace-issuer-server
+  template:
+    metadata:
+      labels:
+        app: dataspace-issuer-server
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.27-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: web
+              containerPort: 80
+          volumeMounts:
+            - name: did-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+            - name: did-config
+              mountPath: /var/www/.well-known/did.json
+              subPath: did.json
+      volumes:
+        - name: did-config
+          configMap:
+            name: dataspace-issuer-did-config

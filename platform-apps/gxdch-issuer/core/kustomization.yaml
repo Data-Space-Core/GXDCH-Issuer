@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - stack-secret.yaml
+  - postgres-initdb-configmap.yaml
+  - postgres-pvc.yaml
+  - postgres-deployment.yaml
+  - postgres-service.yaml
+  - vault-deployment.yaml
+  - vault-service.yaml
+  - vault-seed-job.yaml
+  - issuer-configmap.yaml
+  - issuer-deployment.yaml
+  - issuer-service.yaml
+  - did-server-deployment.yaml
+  - did-server-service.yaml

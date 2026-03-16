@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dataspace-issuer-service
+  namespace: gxdch-issuer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dataspace-issuer-service
+  template:
+    metadata:
+      labels:
+        app: dataspace-issuer-service
+    spec:
+      containers:
+        - name: issuerservice
+          image: ghcr.io/REPLACE_ME/issuerservice:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: dataspace-issuer-service-config
+            - secretRef:
+                name: gxdch-issuer-stack
+          env:
+            - name: EDC_DATASOURCE_DEFAULT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: gxdch-issuer-stack
+                  key: POSTGRES_USER
+            - name: EDC_DATASOURCE_DEFAULT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: gxdch-issuer-stack
+                  key: POSTGRES_PASSWORD
+            - name: EDC_DATASOURCE_MEMBERSHIP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: gxdch-issuer-stack
+                  key: POSTGRES_USER
+            - name: EDC_DATASOURCE_MEMBERSHIP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: gxdch-issuer-stack
+                  key: POSTGRES_PASSWORD
+          ports:
+            - name: web
+              containerPort: 10010
+            - name: sts
+              containerPort: 10011
+            - name: issuance
+              containerPort: 10012
+            - name: issueradmin
+              containerPort: 10013
+            - name: version
+              containerPort: 10014
+            - name: identity
+              containerPort: 10015
+            - name: did
+              containerPort: 10016
+            - name: debug
+              containerPort: 1044
+          startupProbe:
+            httpGet:
+              path: /api/check/startup
+              port: web
+            failureThreshold: 10
+            periodSeconds: 5
+            timeoutSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/check/readiness
+              port: web
+            failureThreshold: 10
+            periodSeconds: 5
+            timeoutSeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /api/check/liveness
+              port: web
+            failureThreshold: 10
+            periodSeconds: 5
+            timeoutSeconds: 30

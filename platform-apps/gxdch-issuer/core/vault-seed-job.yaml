@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: issuer-vault-seed
+  namespace: gxdch-issuer
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: vault-seed
+          image: hashicorp/vault:1.18
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - |
+              until vault status >/dev/null 2>&1; do
+                echo "waiting for vault"
+                sleep 2
+              done
+              vault kv put secret/statuslist-signing-key content="$(cat /bootstrap/statuslist-signing-key.pem)"
+          env:
+            - name: VAULT_ADDR
+              value: http://issuer-vault:8200
+            - name: VAULT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: gxdch-issuer-stack
+                  key: EDC_VAULT_HASHICORP_TOKEN
+          volumeMounts:
+            - name: bootstrap
+              mountPath: /bootstrap
+              readOnly: true
+      volumes:
+        - name: bootstrap
+          secret:
+            secretName: issuer-bootstrap

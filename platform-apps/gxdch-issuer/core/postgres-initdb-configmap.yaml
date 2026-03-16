@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: issuer-initdb-config
+  namespace: gxdch-issuer
+data:
+  issuer-initdb-config.sql: |
+    CREATE USER issuer WITH ENCRYPTED PASSWORD 'issuer' SUPERUSER;
+    CREATE DATABASE issuer;
+    \c issuer issuer
+
+    create extension if not exists pgcrypto;
+
+    create table if not exists membership_attestations
+    (
+        membership_type       integer   default 0,
+        holder_id             varchar                             not null,
+        membership_start_date timestamp default now()             not null,
+        id                    varchar   default gen_random_uuid() not null
+            constraint attestations_pk
+                primary key
+    );
+
+    create unique index if not exists membership_attestation_holder_id_uindex
+      on membership_attestations (holder_id);
