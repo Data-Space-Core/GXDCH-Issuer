@@ -92,6 +92,23 @@ Helper script:
 kubectl apply -f issuer-bootstrap.yaml
 ```
 
+The first argument can be either:
+
+- a dedicated hostname, for example `issuer.gxdch.dil.collab-cloud.eu`
+- or a host plus path, for example `gxdch.dil.collab-cloud.eu/issuer`
+
+For the path-based example, the resulting DID will be:
+
+```text
+did:web:gxdch.dil.collab-cloud.eu:issuer
+```
+
+and the DID document will be expected at:
+
+```text
+https://gxdch.dil.collab-cloud.eu/issuer/did.json
+```
+
 This creates:
 
 - `Secret/issuer-bootstrap`
@@ -107,7 +124,7 @@ The stack expects those resources to exist before sync.
 4. Generate and apply the bootstrap manifest:
 
 ```bash
-./scripts/generate-issuer-bootstrap.sh dataspace-issuer.example.com gxdch-issuer | kubectl apply -f -
+./scripts/generate-issuer-bootstrap.sh gxdch.dil.collab-cloud.eu/issuer gxdch-issuer | kubectl apply -f -
 ```
 
 5. Apply the root ArgoCD application:
@@ -136,7 +153,7 @@ kubectl apply -n argocd -f platform-apps/argocd/gxdch-issuer-application.yaml
 
 The most important externally reachable endpoints are:
 
-- `https://dataspace-issuer.example.com/.well-known/did.json` -> `dataspace-issuer:80`
+- `https://gxdch.dil.collab-cloud.eu/issuer/did.json` -> `dataspace-issuer:80`
 - `https://issuer.example.com/api/admin/` -> `dataspace-issuer-service:10013`
 - `https://issuer.example.com/api/issuance/` -> `dataspace-issuer-service:10012`
 - `https://issuer.example.com/api/identity/` -> `dataspace-issuer-service:10015`

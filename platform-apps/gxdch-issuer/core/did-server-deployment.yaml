@@ -25,7 +25,7 @@ spec:
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
             - name: did-config
-              mountPath: /var/www/.well-known/did.json
+              mountPath: /var/www/did.json
               subPath: did.json
       volumes:
         - name: did-config
