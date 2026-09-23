@@ -13,6 +13,18 @@ spec:
       labels:
         app: dataspace-issuer-service
     spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:16.3-alpine3.20
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              until pg_isready -h issuer-postgres -p 5432 -U postgres; do
+                echo "waiting for issuer-postgres"
+                sleep 2
+              done
       containers:
         - name: issuerservice
           image: ghcr.io/data-space-core/issuerservice:latest

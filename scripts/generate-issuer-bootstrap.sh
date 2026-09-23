@@ -20,7 +20,9 @@ openssl genpkey -algorithm ed25519 -out "$did_private_key" >/dev/null 2>&1
 openssl pkey -in "$did_private_key" -pubout -outform DER -out "$did_public_der" >/dev/null 2>&1
 openssl ecparam -name prime256v1 -genkey -noout -out "$statuslist_key" >/dev/null 2>&1
 
-did_x="$(tail -c 32 "$did_public_der" | basenc --base64url -w0)"
+# The DID document must use the public key belonging to the issuer participant.
+# The provisioning flow can replace this value after Identity API key creation.
+did_x="${DID_PUBLIC_KEY_X:-$(tail -c 32 "$did_public_der" | basenc --base64url -w0)}"
 
 issuer_host="${issuer_input%%/*}"
 issuer_path=""
@@ -90,6 +92,12 @@ data:
         }
       ],
       "authentication": [
+        "key-1"
+      ],
+      "assertionMethod": [
+        "key-1"
+      ],
+      "capabilityInvocation": [
         "key-1"
       ],
       "id": "${did_id}",

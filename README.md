@@ -128,6 +128,18 @@ This creates:
 
 The stack expects those resources to exist before sync.
 
+The generated DID document is only a public document; it does not create the
+issuer participant or its signing key in the Identity API. The issuer
+participant must be provisioned after the service starts, and the generated
+public `x` value must be copied into the DID document. The helper accepts that
+value through `DID_PUBLIC_KEY_X`:
+
+```bash
+DID_PUBLIC_KEY_X='<x from keypair_resource.serialized_public_key>' \
+  ./scripts/generate-issuer-bootstrap.sh gxdch.dil.collab-cloud.eu/issuer gxdch-issuer \
+  | kubectl apply -f -
+```
+
 ## Bootstrap
 
 1. Push this repository to GitHub.
@@ -144,6 +156,40 @@ The stack expects those resources to exist before sync.
 ```bash
 kubectl apply -n argocd -f platform-apps/argocd/gxdch-issuer-application.yaml
 ```
+
+### Provision the issuer participant
+
+The current `issuerservice` image exposes participant management at
+`v1alpha`. Use the super-user API key configured by
+`EDC_IH_API_SUPERUSER_KEY`:
+
+```bash
+ISSUER_DID='did:web:gxdch.dil.collab-cloud.eu:issuer'
+SUPERUSER_KEY='<EDC_IH_API_SUPERUSER_KEY>'
+
+curl -fsS -X POST \
+  'https://gxdch.dil.collab-cloud.eu/issuer/api/identity/v1alpha/participants' \
+  -H 'content-type: application/json' \
+  -H "x-api-key: ${SUPERUSER_KEY}" \
+  -d "$(jq -n --arg did "$ISSUER_DID" '{
+    participantId: $did,
+    did: $did,
+    active: true,
+    roles: [],
+    serviceEndpoints: [],
+    key: {
+      keyId: "key-1",
+      privateKeyAlias: "gxdch-issuer-key-1",
+      keyGeneratorParams: { algorithm: "EdDSA", curve: "Ed25519" }
+    }
+  }')"
+```
+
+The response contains participant API credentials; store them outside Git. Read
+the generated public key from `keypair_resource.serialized_public_key`, set
+`DID_PUBLIC_KEY_X` to its `x` value, reapply the bootstrap manifest, and
+restart the static DID server. The `x` in `did.json` and the `x` in the stored
+key must be identical.
 
 ## Services and Ports
 
@@ -175,9 +221,21 @@ You can host all runtime APIs on one hostname and the DID on another, or reuse a
 ## Operational Notes
 
 - Vault is deployed in dev mode for simplicity. This is not production-grade.
+- Vault dev mode is in-memory. A Vault restart loses generated participant
+  private keys; production requires a persistent, initialized Vault.
 - PostgreSQL uses a single PVC and local credentials from a Kubernetes Secret.
 - The issuer still needs post-deploy administrative setup for holders and issuance flows.
 - Participant-side `Identity Hub` and `EDC` runtimes still belong in `gx-participant1` and `gx-participant2`, not here.
+
+## Recovery Notes
+
+The `gxdch` tenant was reset after its vCluster syncer entered a crash loop
+while parsing an empty stale `/data/pids/apiserver.pid`. The old vCluster PVC
+was removed and recreated. The issuer service also had a PostgreSQL startup
+race; the deployment now waits for `issuer-postgres` before starting
+`issuerservice`. The gateway must route the DID, Identity API, STS, issuance,
+and issuer-admin paths to their corresponding services; a DID-only route is
+not sufficient for DCP.
 
 ## Sources
 
