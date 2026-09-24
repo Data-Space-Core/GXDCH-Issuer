@@ -83,6 +83,9 @@ spec:
               END';
               DROP INDEX IF EXISTS lease_lease_id_uindex;
               ALTER TABLE keypair_resource ALTER COLUMN usage TYPE VARCHAR USING usage::text;
+              ALTER TABLE credential_resource ADD COLUMN IF NOT EXISTS usage VARCHAR;
+              UPDATE credential_resource SET usage = 'holder' WHERE usage IS NULL;
+              ALTER TABLE credential_resource ALTER COLUMN usage SET NOT NULL;
               ALTER TABLE holders ADD COLUMN IF NOT EXISTS anonymous BOOLEAN NOT NULL DEFAULT FALSE;
               ALTER TABLE holders ADD COLUMN IF NOT EXISTS properties JSON DEFAULT '{}';
               ALTER TABLE credential_definitions ADD COLUMN IF NOT EXISTS additional_context JSON NOT NULL DEFAULT '[]';

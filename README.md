@@ -191,6 +191,18 @@ the generated public key from `keypair_resource.serialized_public_key`, set
 restart the static DID server. The `x` in `did.json` and the `x` in the stored
 key must be identical.
 
+If the issuer signs membership credentials with a dedicated credential key,
+also publish that key in the DID document. Set
+`DID_CREDENTIAL_PUBLIC_KEY_X` to the `x` value of the active
+`sign_credentials` key when generating the bootstrap manifest:
+
+```bash
+DID_PUBLIC_KEY_X='<issuer sign_token x>' \
+DID_CREDENTIAL_PUBLIC_KEY_X='<issuer sign_credentials x>' \
+  ./scripts/generate-issuer-bootstrap.sh gxdch.dil.collab-cloud.eu/issuer gxdch-issuer \
+  | kubectl apply -f -
+```
+
 ## Services and Ports
 
 - `dataspace-issuer-service`

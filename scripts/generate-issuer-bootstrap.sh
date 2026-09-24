@@ -47,6 +47,30 @@ if [[ -n "$issuer_path" ]]; then
   done
 fi
 
+# Credential signing may use a separate key from the DID/authentication key.
+# Publish it when its public x coordinate is supplied.
+credential_method_json=""
+credential_assertion_json=""
+if [[ -n "${DID_CREDENTIAL_PUBLIC_KEY_X:-}" ]]; then
+  credential_method_json=$(cat <<EOF
+,
+        {
+          "id": "${did_id}#key-credential",
+          "type": "JsonWebKey2020",
+          "controller": "${did_id}",
+          "publicKeyMultibase": null,
+          "publicKeyJwk": {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "kid": "key-credential",
+            "x": "${DID_CREDENTIAL_PUBLIC_KEY_X}"
+          }
+        }
+EOF
+)
+  credential_assertion_json=', "key-credential"'
+fi
+
 cat <<EOF
 apiVersion: v1
 kind: Secret
@@ -89,13 +113,13 @@ data:
             "crv": "Ed25519",
             "x": "${did_x}"
           }
-        }
+        }${credential_method_json}
       ],
       "authentication": [
         "key-1"
       ],
       "assertionMethod": [
-        "key-1"
+        "key-1"${credential_assertion_json}
       ],
       "capabilityInvocation": [
         "key-1"
