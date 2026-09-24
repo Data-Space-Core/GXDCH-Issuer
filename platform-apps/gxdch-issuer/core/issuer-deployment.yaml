@@ -102,6 +102,8 @@ spec:
                 secretKeyRef:
                   name: gxdch-issuer-stack
                   key: POSTGRES_PASSWORD
+            - name: EDC_IAM_DID_WEB_USE_HTTPS
+              value: "true"
           ports:
             - name: web
               containerPort: 10010
