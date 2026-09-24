@@ -67,6 +67,7 @@ spec:
               ALTER TABLE keypair_resource ALTER COLUMN usage TYPE VARCHAR USING usage::text;
               ALTER TABLE holders ADD COLUMN IF NOT EXISTS anonymous BOOLEAN NOT NULL DEFAULT FALSE;
               ALTER TABLE holders ADD COLUMN IF NOT EXISTS properties JSON DEFAULT '{}';
+              ALTER TABLE credential_definitions ADD COLUMN IF NOT EXISTS additional_context JSON NOT NULL DEFAULT '[]';
               SQL
       containers:
         - name: issuerservice
