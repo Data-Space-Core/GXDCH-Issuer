@@ -68,6 +68,9 @@ spec:
               ALTER TABLE holders ADD COLUMN IF NOT EXISTS anonymous BOOLEAN NOT NULL DEFAULT FALSE;
               ALTER TABLE holders ADD COLUMN IF NOT EXISTS properties JSON DEFAULT '{}';
               ALTER TABLE credential_definitions ADD COLUMN IF NOT EXISTS additional_context JSON NOT NULL DEFAULT '[]';
+              UPDATE keypair_resource
+              SET key_id = participant_context_id || '#' || key_id
+              WHERE participant_context_id LIKE 'did:%' AND key_id NOT LIKE 'did:%';
               SQL
       containers:
         - name: issuerservice
