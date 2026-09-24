@@ -74,7 +74,7 @@ spec:
               SQL
       containers:
         - name: issuerservice
-          image: ghcr.io/data-space-core/issuerservice:0.18.0-identity-auth-sql-vault-20260924-2
+          image: ghcr.io/data-space-core/issuerservice:0.18.0-identity-auth-sql-vault-20260924-3
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
