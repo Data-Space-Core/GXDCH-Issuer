@@ -66,6 +66,7 @@ spec:
               UPDATE edc_lease SET resource_kind = 'issuance-process' WHERE resource_kind IS NULL;
               ALTER TABLE keypair_resource ALTER COLUMN usage TYPE VARCHAR USING usage::text;
               ALTER TABLE holders ADD COLUMN IF NOT EXISTS anonymous BOOLEAN NOT NULL DEFAULT FALSE;
+              ALTER TABLE holders ADD COLUMN IF NOT EXISTS properties JSON DEFAULT '{}';
               SQL
       containers:
         - name: issuerservice
