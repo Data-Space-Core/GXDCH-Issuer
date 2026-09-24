@@ -52,7 +52,7 @@ spec:
               ALTER TABLE edc_sts_client ADD COLUMN IF NOT EXISTS participant_context_id VARCHAR;
               UPDATE edc_sts_client SET participant_context_id = id WHERE participant_context_id IS NULL;
               ALTER TABLE edc_sts_client ALTER COLUMN participant_context_id SET NOT NULL;
-              DO $$
+              DO \$\$
               BEGIN
                 IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'edc_sts_client' AND column_name = 'private_key_alias') THEN
                   ALTER TABLE edc_sts_client ALTER COLUMN private_key_alias DROP NOT NULL;
@@ -60,7 +60,7 @@ spec:
                 IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'edc_sts_client' AND column_name = 'public_key_reference') THEN
                   ALTER TABLE edc_sts_client ALTER COLUMN public_key_reference DROP NOT NULL;
                 END IF;
-              END $$;
+              END \$\$;
               ALTER TABLE edc_lease ADD COLUMN IF NOT EXISTS resource_id VARCHAR;
               ALTER TABLE edc_lease ADD COLUMN IF NOT EXISTS resource_kind VARCHAR;
               UPDATE edc_lease SET resource_kind = 'issuance-process' WHERE resource_kind IS NULL;
