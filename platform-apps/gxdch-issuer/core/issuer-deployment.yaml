@@ -25,6 +25,47 @@ spec:
                 echo "waiting for issuer-postgres"
                 sleep 2
               done
+        - name: migrate-legacy-schema
+          image: postgres:16.3-alpine3.20
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: gxdch-issuer-stack
+                  key: POSTGRES_USER
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: gxdch-issuer-stack
+                  key: POSTGRES_PASSWORD
+            - name: PGDATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: gxdch-issuer-stack
+                  key: POSTGRES_DB
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              psql -h issuer-postgres -v ON_ERROR_STOP=1 <<'SQL'
+              ALTER TABLE edc_sts_client ADD COLUMN IF NOT EXISTS participant_context_id VARCHAR;
+              UPDATE edc_sts_client SET participant_context_id = id WHERE participant_context_id IS NULL;
+              ALTER TABLE edc_sts_client ALTER COLUMN participant_context_id SET NOT NULL;
+              DO $$
+              BEGIN
+                IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'edc_sts_client' AND column_name = 'private_key_alias') THEN
+                  ALTER TABLE edc_sts_client ALTER COLUMN private_key_alias DROP NOT NULL;
+                END IF;
+                IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'edc_sts_client' AND column_name = 'public_key_reference') THEN
+                  ALTER TABLE edc_sts_client ALTER COLUMN public_key_reference DROP NOT NULL;
+                END IF;
+              END $$;
+              ALTER TABLE edc_lease ADD COLUMN IF NOT EXISTS resource_id VARCHAR;
+              ALTER TABLE edc_lease ADD COLUMN IF NOT EXISTS resource_kind VARCHAR;
+              UPDATE edc_lease SET resource_kind = 'issuance-process' WHERE resource_kind IS NULL;
+              ALTER TABLE keypair_resource ALTER COLUMN usage TYPE VARCHAR USING usage::text;
+              SQL
       containers:
         - name: issuerservice
           image: ghcr.io/data-space-core/issuerservice:0.18.0-identity-auth-sql-vault-20260924-2
