@@ -26,4 +26,4 @@ data:
   EDC_DATASOURCE_MEMBERSHIP_URL: jdbc:postgresql://issuer-postgres:5432/issuer
   EDC_SQL_SCHEMA_AUTOCREATE: "true"
   EDC_IAM_ACCESSTOKEN_JTI_VALIDATION: "true"
-  EDC_IAM_DID_WEB_USE_HTTPS: "false"
+  EDC_IAM_DID_WEB_USE_HTTPS: "true"
