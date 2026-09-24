@@ -63,7 +63,12 @@ spec:
               END';
               ALTER TABLE edc_lease ADD COLUMN IF NOT EXISTS resource_id VARCHAR;
               ALTER TABLE edc_lease ADD COLUMN IF NOT EXISTS resource_kind VARCHAR;
+              UPDATE edc_lease SET resource_id = lease_id WHERE resource_id IS NULL;
               UPDATE edc_lease SET resource_kind = 'issuance-process' WHERE resource_kind IS NULL;
+              ALTER TABLE edc_lease ALTER COLUMN resource_id SET NOT NULL;
+              ALTER TABLE edc_lease ALTER COLUMN resource_kind SET NOT NULL;
+              CREATE UNIQUE INDEX IF NOT EXISTS edc_lease_resource_uindex
+                ON edc_lease (resource_id, resource_kind);
               ALTER TABLE keypair_resource ALTER COLUMN usage TYPE VARCHAR USING usage::text;
               ALTER TABLE holders ADD COLUMN IF NOT EXISTS anonymous BOOLEAN NOT NULL DEFAULT FALSE;
               ALTER TABLE holders ADD COLUMN IF NOT EXISTS properties JSON DEFAULT '{}';
