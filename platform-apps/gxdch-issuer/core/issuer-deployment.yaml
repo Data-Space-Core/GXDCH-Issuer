@@ -69,6 +69,19 @@ spec:
               ALTER TABLE edc_lease ALTER COLUMN resource_kind SET NOT NULL;
               CREATE UNIQUE INDEX IF NOT EXISTS edc_lease_resource_uindex
                 ON edc_lease (resource_id, resource_kind);
+              DO '
+              BEGIN
+                IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = ''issuance_process_lease_lease_id_fk'') THEN
+                  ALTER TABLE edc_issuance_process DROP CONSTRAINT issuance_process_lease_lease_id_fk;
+                END IF;
+                IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = ''lease_pk'') THEN
+                  ALTER TABLE edc_lease DROP CONSTRAINT lease_pk;
+                END IF;
+                IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = ''edc_lease'' AND column_name = ''lease_id'') THEN
+                  ALTER TABLE edc_lease ALTER COLUMN lease_id DROP NOT NULL;
+                END IF;
+              END';
+              DROP INDEX IF EXISTS lease_lease_id_uindex;
               ALTER TABLE keypair_resource ALTER COLUMN usage TYPE VARCHAR USING usage::text;
               ALTER TABLE holders ADD COLUMN IF NOT EXISTS anonymous BOOLEAN NOT NULL DEFAULT FALSE;
               ALTER TABLE holders ADD COLUMN IF NOT EXISTS properties JSON DEFAULT '{}';
