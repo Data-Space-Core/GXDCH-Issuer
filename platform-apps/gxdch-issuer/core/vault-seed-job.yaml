@@ -19,10 +19,16 @@ spec:
                 echo "waiting for vault"
                 sleep 2
               done
+              vault kv put secret/super-user-apikey content="${EDC_IH_API_SUPERUSER_KEY}"
               vault kv put secret/statuslist-signing-key content="$(cat /bootstrap/statuslist-signing-key.pem)"
           env:
             - name: VAULT_ADDR
               value: http://issuer-vault:8200
+            - name: EDC_IH_API_SUPERUSER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: gxdch-issuer-stack
+                  key: EDC_IH_API_SUPERUSER_KEY
             - name: VAULT_TOKEN
               valueFrom:
                 secretKeyRef:

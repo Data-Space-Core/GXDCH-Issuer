@@ -11,6 +11,44 @@ data:
 
     create extension if not exists pgcrypto;
 
+    -- IdentityHub's initial API key is configured in the stack Secret. Seed the
+    -- corresponding administrative participant so the first authenticated API
+    -- request can provision the tenant issuer participant.
+    CREATE TABLE IF NOT EXISTS participant_context
+    (
+        participant_context_id VARCHAR PRIMARY KEY NOT NULL,
+        identity               VARCHAR UNIQUE NOT NULL,
+        created_date           BIGINT NOT NULL,
+        last_modified_date     BIGINT,
+        state                  INTEGER NOT NULL,
+        properties             JSON DEFAULT '{}'
+    );
+    CREATE TABLE IF NOT EXISTS edc_participant_context_config
+    (
+        participant_context_id VARCHAR PRIMARY KEY NOT NULL,
+        created_date           BIGINT NOT NULL,
+        last_modified_date     BIGINT,
+        entries                JSON DEFAULT '{}',
+        private_entries        JSON DEFAULT '{}'
+    );
+    INSERT INTO participant_context
+        (participant_context_id, identity, created_date, last_modified_date, state, properties)
+    VALUES
+        ('super-user', 'did:web:super-user',
+         (extract(epoch from clock_timestamp()) * 1000)::bigint,
+         (extract(epoch from clock_timestamp()) * 1000)::bigint,
+         200,
+         '{"apiTokenAlias":"super-user-apikey","scopes":["identity-api:admin","issuer-admin-api:admin"]}'::json)
+    ON CONFLICT (participant_context_id) DO NOTHING;
+    INSERT INTO edc_participant_context_config
+        (participant_context_id, created_date, last_modified_date, entries, private_entries)
+    VALUES
+        ('super-user',
+         (extract(epoch from clock_timestamp()) * 1000)::bigint,
+         (extract(epoch from clock_timestamp()) * 1000)::bigint,
+         '{}'::json, '{}'::json)
+    ON CONFLICT (participant_context_id) DO NOTHING;
+
     create table if not exists membership_attestations
     (
         membership_type       integer   default 0,
