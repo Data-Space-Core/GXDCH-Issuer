@@ -1,0 +1,86 @@
+routes:
+  - route_name: gxdch-issuer-identity
+    service_name: dataspace-issuer-service
+    service_namespace: gxdch-issuer
+    service_port: 10015
+    hostname: identity.{tenant_host}
+    path_prefix: /
+    no_url_rewrite: true
+
+  - route_name: gxdch-issuer-issuance
+    service_name: dataspace-issuer-service
+    service_namespace: gxdch-issuer
+    service_port: 10012
+    hostname: issuance.{tenant_host}
+    path_prefix: /
+    no_url_rewrite: true
+
+  - route_name: gxdch-issuer-admin
+    service_name: dataspace-issuer-service
+    service_namespace: gxdch-issuer
+    service_port: 10013
+    hostname: issuer.{tenant_host}
+    path_prefix: /
+    no_url_rewrite: true
+
+  - route_name: gxdch-issuer-sts
+    service_name: dataspace-issuer-service
+    service_namespace: gxdch-issuer
+    service_port: 10011
+    hostname: issuer.{tenant_host}
+    path_prefix: /api/sts
+    no_url_rewrite: true
+
+  - route_name: gxdch-issuer-did
+    service_name: dataspace-issuer
+    service_namespace: gxdch-issuer
+    service_port: 80
+    hostname: '{tenant_host}'
+    path_prefix: /issuer/did.json
+    route_definition_text: >-
+      {"hostnames":["{tenant_host}"],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/issuer/did.json"}}],"filters":[{"type":"URLRewrite","urlRewrite":{"path":{"type":"ReplaceFullPath","replaceFullPath":"/did.json"}}}],"backendRefs":[{"name":"{backend_service_name}","namespace":"{tenant_host_namespace}","port":80}]}]}
+
+  - route_name: gxdch-issuer-identity-path
+    service_name: dataspace-issuer-service
+    service_namespace: gxdch-issuer
+    service_port: 10015
+    hostname: '{tenant_host}'
+    path_prefix: /issuer/api/identity
+    route_definition_text: >-
+      {"hostnames":["{tenant_host}"],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/issuer/api/identity"}}],"filters":[{"type":"URLRewrite","urlRewrite":{"path":{"type":"ReplacePrefixMatch","replacePrefixMatch":"/api/identity"}}}],"backendRefs":[{"name":"{backend_service_name}","namespace":"{tenant_host_namespace}","port":10015}]}]}
+
+  - route_name: gxdch-issuer-admin-path
+    service_name: dataspace-issuer-service
+    service_namespace: gxdch-issuer
+    service_port: 10013
+    hostname: '{tenant_host}'
+    path_prefix: /issuer/api/admin
+    route_definition_text: >-
+      {"hostnames":["{tenant_host}"],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/issuer/api/admin"}}],"filters":[{"type":"URLRewrite","urlRewrite":{"path":{"type":"ReplacePrefixMatch","replacePrefixMatch":"/api/admin"}}}],"backendRefs":[{"name":"{backend_service_name}","namespace":"{tenant_host_namespace}","port":10013}]}]}
+
+  - route_name: gxdch-issuer-issuance-path
+    service_name: dataspace-issuer-service
+    service_namespace: gxdch-issuer
+    service_port: 10012
+    hostname: '{tenant_host}'
+    path_prefix: /issuer/api/issuance
+    route_definition_text: >-
+      {"hostnames":["{tenant_host}"],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/issuer/api/issuance"}}],"filters":[{"type":"URLRewrite","urlRewrite":{"path":{"type":"ReplacePrefixMatch","replacePrefixMatch":"/api/issuance"}}}],"backendRefs":[{"name":"{backend_service_name}","namespace":"{tenant_host_namespace}","port":10012}]}]}
+
+  - route_name: gxdch-issuer-sts-path
+    service_name: dataspace-issuer-service
+    service_namespace: gxdch-issuer
+    service_port: 10011
+    hostname: '{tenant_host}'
+    path_prefix: /issuer/api/sts
+    route_definition_text: >-
+      {"hostnames":["{tenant_host}"],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/issuer/api/sts"}}],"filters":[{"type":"URLRewrite","urlRewrite":{"path":{"type":"ReplacePrefixMatch","replacePrefixMatch":"/api/sts"}}}],"backendRefs":[{"name":"{backend_service_name}","namespace":"{tenant_host_namespace}","port":10011}]}]}
+
+  - route_name: gxdch-issuer-version-path
+    service_name: dataspace-issuer-service
+    service_namespace: gxdch-issuer
+    service_port: 10014
+    hostname: '{tenant_host}'
+    path_prefix: /issuer/.well-known/api
+    route_definition_text: >-
+      {"hostnames":["{tenant_host}"],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/issuer/.well-known/api"}}],"filters":[{"type":"URLRewrite","urlRewrite":{"path":{"type":"ReplaceFullPath","replaceFullPath":"/.well-known/api"}}}],"backendRefs":[{"name":"{backend_service_name}","namespace":"{tenant_host_namespace}","port":10014}]}]}

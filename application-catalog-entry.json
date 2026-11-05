@@ -1,0 +1,10 @@
+{
+  "name": "gxdch-issuer",
+  "display_name": "GXDCH Issuer",
+  "description": "GXDCH issuer services and tenant-specific identity endpoints.",
+  "repo_url": "https://github.com/Data-Space-Core/GXDCH-Issuer.git",
+  "target_revision": "HEAD",
+  "path": "platform-apps/gxdch-issuer",
+  "namespace": "gxdch-issuer",
+  "enabled": true
+}
