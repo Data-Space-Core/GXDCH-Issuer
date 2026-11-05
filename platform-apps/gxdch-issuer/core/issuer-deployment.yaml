@@ -48,6 +48,12 @@ spec:
             - /bin/sh
             - -ec
             - |
+              # A new database has no legacy tables yet. Let the issuer runtime
+              # create its schema before applying compatibility migrations.
+              if ! psql -h issuer-postgres -tAc "SELECT to_regclass('public.edc_sts_client')" | grep -q 'edc_sts_client'; then
+                echo "issuer schema is new; skipping legacy migration"
+                exit 0
+              fi
               psql -h issuer-postgres -v ON_ERROR_STOP=1 <<'SQL'
               ALTER TABLE edc_sts_client ADD COLUMN IF NOT EXISTS participant_context_id VARCHAR;
               UPDATE edc_sts_client SET participant_context_id = id WHERE participant_context_id IS NULL;
