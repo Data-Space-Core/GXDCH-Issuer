@@ -232,6 +232,15 @@ You can host all runtime APIs on one hostname and the DID on another, or reuse a
 
 ## Operational Notes
 
+- `issuer-vault-seed` is a Sync hook recreated with `BeforeHookCreation` so Job
+  template changes never try to patch immutable fields. It only updates bootstrap
+  Vault values when they differ and never rotates participant keys.
+- The public NGINX DID facade proxies IdentityHub's DID publisher using the
+  canonical DID host/path from the bootstrap document. Its keys come from the
+  active IdentityHub document, not the bootstrap ConfigMap's placeholder public
+  key; this also tracks signing-key rotation without copying private keys.
+- Run `python3 -m unittest discover -s tests` to validate seed lifecycle and DID
+  proxy configuration (requires PyYAML).
 - Vault is deployed in dev mode for simplicity. This is not production-grade.
 - Vault dev mode is in-memory. A Vault restart loses generated participant
   private keys; production requires a persistent, initialized Vault.

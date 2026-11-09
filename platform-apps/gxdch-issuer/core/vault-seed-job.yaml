@@ -3,6 +3,9 @@ kind: Job
 metadata:
   name: issuer-vault-seed
   namespace: gxdch-issuer
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
 spec:
   template:
     spec:
@@ -15,12 +18,19 @@ spec:
             - /bin/sh
             - -c
             - |
+              set -eu
               until vault status >/dev/null 2>&1; do
                 echo "waiting for vault"
                 sleep 2
               done
-              vault kv put secret/super-user-apikey content="${EDC_IH_API_SUPERUSER_KEY}"
-              vault kv put secret/statuslist-signing-key content="$(cat /bootstrap/statuslist-signing-key.pem)"
+              seed_secret() {
+                current="$(vault kv get -field=content "secret/$1" 2>/dev/null || true)"
+                if [ "$current" != "$2" ]; then
+                  vault kv put "secret/$1" content="$2" >/dev/null
+                fi
+              }
+              seed_secret super-user-apikey "${EDC_IH_API_SUPERUSER_KEY}"
+              seed_secret statuslist-signing-key "$(cat /bootstrap/statuslist-signing-key.pem)"
           env:
             - name: VAULT_ADDR
               value: http://issuer-vault:8200

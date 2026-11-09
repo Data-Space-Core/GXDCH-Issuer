@@ -13,6 +13,20 @@ spec:
       labels:
         app: dataspace-issuer-server
     spec:
+      initContainers:
+        - name: configure-did-proxy
+          image: python:3.12-alpine
+          imagePullPolicy: IfNotPresent
+          command: [python, /scripts/did-proxy-config.py]
+          volumeMounts:
+            - name: did-config
+              mountPath: /bootstrap
+              readOnly: true
+            - name: did-proxy-script
+              mountPath: /scripts
+              readOnly: true
+            - name: generated-config
+              mountPath: /generated
       containers:
         - name: nginx
           image: nginx:1.27-alpine
@@ -21,13 +35,15 @@ spec:
             - name: web
               containerPort: 80
           volumeMounts:
-            - name: did-config
+            - name: generated-config
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
-            - name: did-config
-              mountPath: /var/www/did.json
-              subPath: did.json
       volumes:
         - name: did-config
           configMap:
             name: dataspace-issuer-did-config
+        - name: did-proxy-script
+          configMap:
+            name: issuer-did-proxy-script
+        - name: generated-config
+          emptyDir: {}
