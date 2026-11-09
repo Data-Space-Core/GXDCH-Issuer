@@ -40,6 +40,14 @@ routes:
     route_definition_text: >-
       {"hostnames":["{tenant_host}"],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/issuer/did.json"}}],"filters":[{"type":"URLRewrite","urlRewrite":{"path":{"type":"ReplaceFullPath","replaceFullPath":"/did.json"}}}],"backendRefs":[{"name":"{backend_service_name}","namespace":"{tenant_host_namespace}","port":80}]}]}
 
+  - route_name: gxdch-issuer-did-alias
+    service_name: dataspace-issuer
+    service_namespace: gxdch-issuer
+    service_port: 80
+    hostname: issuer.{tenant_host}
+    path_prefix: /did.json
+    no_url_rewrite: true
+
   - route_name: gxdch-issuer-identity-path
     service_name: dataspace-issuer-service
     service_namespace: gxdch-issuer

@@ -13,6 +13,15 @@ spec.loader.exec_module(proxy)
 
 
 class BootstrapTests(unittest.TestCase):
+    def test_onboarding_did_alias_uses_the_same_publisher(self):
+        routes = yaml.safe_load((ROOT / "deploy" / "routes.yaml").read_text())["routes"]
+        alias = next(route for route in routes if route["route_name"] == "gxdch-issuer-did-alias")
+        self.assertEqual(alias["hostname"], "issuer.{tenant_host}")
+        self.assertEqual(alias["path_prefix"], "/did.json")
+        self.assertEqual(alias["service_name"], "dataspace-issuer")
+        self.assertEqual(alias["service_port"], 80)
+        self.assertTrue(alias["no_url_rewrite"])
+
     def test_seed_job_is_recreated_not_patched(self):
         job = yaml.safe_load((CORE / "vault-seed-job.yaml").read_text())
         annotations = job["metadata"]["annotations"]
